@@ -1,4 +1,5 @@
 #include "client.h"
+#include <stdio.h>
 #include <commons/txt.h>
 
 int main(void)
@@ -37,7 +38,7 @@ int main(void)
 
 	/* ---------------- LEER DE CONSOLA ---------------- */
 
-	leer_consola(logger);
+	//leer_consola(logger);
 
 	/*---------------------------------------------------PARTE 3-------------------------------------------------------------*/
 
@@ -45,9 +46,8 @@ int main(void)
 
 	// Creamos una conexión hacia el servidor
 	conexion = crear_conexion(ip, puerto);
-
 	// Enviamos al servidor el valor de CLAVE como mensaje
-
+	enviar_mensaje(valor,conexion);
 	// Armamos y enviamos el paquete
 	paquete(conexion);
 
@@ -77,7 +77,6 @@ t_config* iniciar_config(void)
 		exit(EXIT_FAILURE);
 	}
 	
-
 	return nuevo_config;
 }
 
@@ -100,18 +99,27 @@ void leer_consola(t_log* logger)
 void paquete(int conexion)
 {
 	// Ahora toca lo divertido!
-	char* leido;
-	t_paquete* paquete;
-
+	t_paquete* paquete = crear_paquete();
 	// Leemos y esta vez agregamos las lineas al paquete
-
-
+	char* leido = readline("> ");
+	while (strcmp(leido,"") != 0)
+	{
+		agregar_a_paquete(paquete,leido,strlen(leido));
+		free(leido);
+		leido = readline(">> ");
+	}
 	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
-	
+	free(leido);
+	// Envio el paquete con las lineas
+	enviar_paquete(paquete,conexion);
+	eliminar_paquete(paquete);
 }
 
 void terminar_programa(int conexion, t_log* logger, t_config* config)
 {
 	/* Y por ultimo, hay que liberar lo que utilizamos (conexion, log y config) 
 	  con las funciones de las commons y del TP mencionadas en el enunciado */
+	liberar_conexion(conexion);
+	log_destroy(logger);
+	config_destroy(config);
 }
