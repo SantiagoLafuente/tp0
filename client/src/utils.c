@@ -1,5 +1,5 @@
 #include "utils.h"
-
+#include <commons/error.h>
 
 void* serializar_paquete(t_paquete* paquete, int bytes)
 {
@@ -27,13 +27,18 @@ int crear_conexion(char *ip, char* puerto)
 	hints.ai_socktype = SOCK_STREAM;
 
 	// Ahora vamos a crear el socket.
-	socket_cliente = getaddrinfo(ip, puerto, &hints, &server_info);
+	getaddrinfo(ip, puerto, &hints, &server_info);
 
 	// Ahora que tenemos el socket, vamos a conectarlo
-	int fd_conexion = socket(server_info->ai_family,
-                         server_info->ai_socktype,
-                         server_info->ai_protocol);
-	socket_cliente = connect(fd_conexion, server_info->ai_addr, server_info->ai_addrlen);
+	socket_cliente = socket(server_info->ai_family,server_info->ai_socktype,server_info->ai_protocol);
+	if (socket_cliente == -1){
+		error_show("No se pudo crear el socket");
+		abort();
+	}
+	if (connect(socket_cliente,server_info->ai_addr, server_info->ai_addrlen) == -1){
+		error_show("No se pudo conectar con el servidor");
+		abort();
+	}
 
 	freeaddrinfo(server_info);
 	return socket_cliente;

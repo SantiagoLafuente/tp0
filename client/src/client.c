@@ -1,6 +1,7 @@
 #include "client.h"
 #include <stdio.h>
 #include <commons/txt.h>
+#include <commons/error.h>
 
 int main(void)
 {
@@ -62,7 +63,7 @@ t_log* iniciar_logger(void)
 	t_log* nuevo_logger = log_create("tp0.log","tp0.log",true,LOG_LEVEL_INFO);
 	if (nuevo_logger == NULL)
 	{
-		perror("Error con el log. No se pudo crear o encontrar el archivo");
+		error_show("Error con el log. No se pudo crear o encontrar el archivo");
 		exit(EXIT_FAILURE);
 	}
 	return nuevo_logger;
@@ -73,7 +74,7 @@ t_config* iniciar_config(void)
 	t_config* nuevo_config = config_create("cliente.config");
 	if (nuevo_config == NULL)
 	{
-		perror("Error al intentar cargar el config");
+		error_show("Error al intentar cargar el config");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -85,12 +86,12 @@ void leer_consola(t_log* logger)
 	char* leido;
 	// La primera te la dejo de yapa
 	leido = readline("> ");
-	log_info(logger,">> %s",leido);
+	log_info(logger,"> %s",leido);
 	// El resto, las vamos leyendo y logueando hasta recibir un string vacío
 	while (strcmp(leido, "") != 0){
 		free(leido);
 		leido = readline("> ");
-		log_info(logger,">> %s",leido);
+		log_info(logger,"> %s",leido);
 	}
 	// ¡No te olvides de liberar las lineas antes de regresar!
 	free(leido);
@@ -106,12 +107,13 @@ void paquete(int conexion)
 	{
 		agregar_a_paquete(paquete,leido,strlen(leido));
 		free(leido);
-		leido = readline(">> ");
+		leido = readline("> ");
 	}
 	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
 	free(leido);
 	// Envio el paquete con las lineas
 	enviar_paquete(paquete,conexion);
+	printf("Se envio el paquete");
 	eliminar_paquete(paquete);
 }
 
